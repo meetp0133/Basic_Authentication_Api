@@ -10,9 +10,6 @@ exports.register = async (req, res) => {
         let reqParam = req.body
 
         if (req.file && req.file.filename) reqParam.profileImage = req.file.filename
-        if (!req.file) {
-            error(res, "Image is required", 400)
-        }
 
         const validationMessage = await userAddValidation(reqParam)
         if (validationMessage) return error(res, validationMessage, 400)

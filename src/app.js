@@ -15,6 +15,9 @@ app.use("/user",user)
 const category = require("./routes/category.route")
 app.use("/category",category)
 
+const product = require("./routes/product.route")
+app.use("/product",product)
+
 const publicDirectory = path.join(__dirname, "../");
 app.use(express.static(publicDirectory))
 

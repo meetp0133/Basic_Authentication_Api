@@ -1,6 +1,6 @@
 const categoryModel = require("../models/category.model")
 const {success,error} = require("../helper/responseHelper")
-const trasformer = require("../transformer/categoryTrasformer")
+const trasformer = require("../transformer/categoryTransformer")
 const {categoryValidation,editCategoryValidation} = require("../validation/categoryValidation")
 
 exports.addEditCategory = async (req, res) => {
@@ -8,9 +8,7 @@ exports.addEditCategory = async (req, res) => {
         let reqParam = req.body;
 
         if (req.file && req.file.filename) reqParam.categoryImage = req.file.filename
-        if (!req.file) {
-            error(res, "ImageIsRequired", 400)
-        }
+
         let exitingCategory
         if (reqParam.categoryId) {
             const validationMessage = await editCategoryValidation(reqParam);
@@ -22,21 +20,18 @@ exports.addEditCategory = async (req, res) => {
         } else {
 
             const validationMessage = await categoryValidation(req.body);
-            if (validationMessage) {
-                return error(res, validationMessage, 400)
-            }
+            if (validationMessage) return error(res, validationMessage, 400)
 
             exitingCategory = await categoryModel.findOne({categoryName: req.body.categoryName});
-            if (exitingCategory) {
-                return success(res, 0, "Category already exists.", 200)
-            }
-
+            if (exitingCategory) return success(res, 0, "Category already exists.", 200)
             exitingCategory = new categoryModel();
         }
+
         exitingCategory.categoryName = reqParam?.categoryName ? reqParam.categoryName : exitingCategory.categoryName
         exitingCategory.categoryDescription = reqParam?.categoryDescription ? reqParam.categoryDescription : exitingCategory.categoryDescription
         exitingCategory.status = reqParam?.status ? reqParam.status : exitingCategory.status
         exitingCategory.categoryImage = reqParam?.categoryImage ? reqParam.categoryImage : exitingCategory.categoryImage
+
         await exitingCategory.save();
         const response = trasformer.categoryTransformDetails(exitingCategory)
         if (reqParam.categoryId) {

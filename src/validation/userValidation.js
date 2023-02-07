@@ -9,6 +9,7 @@ module.exports = {
             password: Joi.string().min(5).required(),
             phone: Joi.string().length(10).pattern(/[6-9]{1}[0-9]{9}/).required(),
             gender: Joi.string().valid("male","female").required(),
+            profileImage: Joi.string().required(),
         }).unknown(true);
         const {error} = schema.validate(req);
         if (error) {
