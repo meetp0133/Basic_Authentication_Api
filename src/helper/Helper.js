@@ -12,3 +12,10 @@ exports.validationMessageKey = (apikey, error) => {
     const result = apikey + type + key
     return result
 }
+
+
+exports.urlData = (imageName, fileName) => {
+    let urlData = "";
+    urlData = `http://localhost:3000/public/${fileName}/${imageName}`;
+    return urlData;
+};

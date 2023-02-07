@@ -18,6 +18,9 @@ const userSchema = new mongoose.Schema({
     phone:{
         type:String
     },
+    profileImage:{
+        type:String
+    },
     gender:{
         type:String,
         enum:["male","female"]

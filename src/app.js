@@ -2,7 +2,7 @@ const express = require("express")
 const app = new express()
 require("./db/conn")
 const port = process.env.PORT || 3000;
-
+const path = require("path")
 app.use(express.json())
 
 app.get("/",(req,res)=>{
@@ -11,6 +11,12 @@ app.get("/",(req,res)=>{
 
 const user = require("./routes/user.route")
 app.use("/user",user)
+
+const category = require("./routes/category.route")
+app.use("/category",category)
+
+const publicDirectory = path.join(__dirname, "../");
+app.use(express.static(publicDirectory))
 
 app.listen(port,()=>{
     console.log(`Connection setup on http://localhost:${port}`)

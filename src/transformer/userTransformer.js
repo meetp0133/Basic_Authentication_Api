@@ -1,7 +1,10 @@
+const {urlData} = require("../helper/Helper")
+
 exports.transformer = (data) => {
     return {
         status: data?.status ? data.status : 0,
         userId: data?._id ? data._id : "",
+        profileImage: data?.profileImage ? urlData(data.profileImage,"user") : "",
         Name: data?.name ? data.name : "",
         Email: data?.email ? data.email : "",
         Password: data?.password ? data.password : "",
@@ -27,6 +30,7 @@ exports.signtransformer = (data) => {
         Email: data?.email ? data.email : "",
         Phone: data?.phone ? data.phone : "",
         Gender: data?.gender ? data.gender : "",
+        profileImage: data?.profileImage ? urlData(data.profileImage,"user") : "",
 
     };
 };

@@ -8,6 +8,12 @@ const jwt = require("jsonwebtoken")
 exports.register = async (req, res) => {
     try {
         let reqParam = req.body
+
+        if (req.file && req.file.filename) reqParam.profileImage = req.file.filename
+        if (!req.file) {
+            error(res, "Image is required", 400)
+        }
+
         const validationMessage = await userAddValidation(reqParam)
         if (validationMessage) return error(res, validationMessage, 400)
 
@@ -48,6 +54,7 @@ exports.login = async (req, res) => {
             Email: userExist.email,
             Phone: userExist.phone,
             Gender: userExist.gender,
+            Profile_Image: userExist.profileImage,
         }
         const token = await jwt.sign(tokenData, "tOpSeCretaeKey", {expiresIn: "365d"})
         const response = await transformer.signInTransformer(userExist)
@@ -58,13 +65,64 @@ exports.login = async (req, res) => {
     }
 }
 
-exports.viewProfile = async (req,res) =>{
-    const userId = req.user
-    console.log("userIduserId",userId)
-    const fineUser = await userModel.findOne({_id:userId,status:1})
-    if(!fineUser)return error(res, "User Not Found..!!!", 400)
+exports.viewProfile = async (req, res) => {
+    try {
+        const userId = req.user._id
 
-    const response = await transformer.userTransformer(fineUser)
-    return success(res,1,"user details..!!",200,response)
+        const fineUser = await userModel.findOne({_id: userId, status: 1})
+        if (!fineUser) return error(res, "User Not Found..!!!", 400)
 
+        const response = await transformer.userTransformer(fineUser)
+        return success(res, 1, "user details..!!", 200, response)
+    } catch (e) {
+        return error(res, "Something wrong.", 500)
+
+    }
+
+}
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const userId = req.user._id
+        let reqParam = req.body
+        let findUser = await userModel.findOne({_id: userId, status: 1})
+        if (!findUser) return success(res, 0, "User not found", 200)
+        findUser.name = reqParam?.name ? reqParam.name : findUser.name
+        findUser.email = reqParam?.email ? reqParam.email : findUser.email
+        findUser.phone = reqParam?.phone ? reqParam.phone : findUser.phone
+        findUser.gender = reqParam?.gender ? reqParam.gender : findUser.gender
+
+        await findUser.save()
+        const response = await transformer.userTransformer(findUser)
+        return success(res, 1, "Profile Updated successfully", 200, response)
+    } catch (e) {
+        return error(res, "Something wrong.", 500)
+
+    }
+}
+
+exports.changePassword = async (req, res) => {
+    try {
+        const userId = req.user._id
+        let reqParam = req.body
+        let foundUser = await userModel.findOne({_id: userId, status: 1})
+
+        if (foundUser) {
+            const passVerify = await bcrypt.compare(reqParam.oldPassword, foundUser.password)
+            if (passVerify) {
+                if (reqParam.oldPassword == reqParam.newPassword) {
+                    return success(res, 0, "Current password and new password cannot be same.", 400);
+                }
+                const newPassword = await bcrypt.hash(reqParam.newPassword, 10)
+                await foundUser.updateOne({password: newPassword})
+                return success(res, 1, "Password updated successfully", 200);
+            } else {
+                return error(res, "Please enter valid password.", 400);
+            }
+        }
+        return success(res, 1, "Profile Updated successfully", 200,/*response*/)
+    } catch (e) {
+        return error(res, "Something wrong.", 500)
+
+    }
 }
